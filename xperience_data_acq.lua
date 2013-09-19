@@ -8,7 +8,7 @@ yarp.Network()
 shouldExit = false
 
 --parameters
-table_height= -0.12
+table_height= -0.1
 
 thetaDraw = 90.0
 thetaPush = 270.0
@@ -35,14 +35,14 @@ target_port=yarp.Port()                  -- get 2d position of target (left)
 ret = human_port:open("/xpHelper/human")
 ret = ret and karmamotor_port:open("/xpHelper/kmotor:o")
 ret = ret and gazectrlrpc_port:open("/xpHelper/gaze:rpc")
-target_port:setTimeout(2.0)
 ret = ret and target_port:open("/xpHelper/target:i")
 
 repeat
     local cmd = yarp.Bottle()
     human_port:read(cmd, true);
     local hAnsw= yarp.Bottle()
-    if (cmd:get(0):asString() == "draw") or (cmd:get(0):asString() == "push") 
+        print (cmd:toString())
+    if (cmd:get(0):asString():c_str() == "draw") or (cmd:get(0):asString():c_str() == "push") 
     then
         print ("received command: ")
         print (cmd:toString())
@@ -50,28 +50,30 @@ repeat
         if target_port:read(target2d)
         then if target2d:size() >1		
              then 
-                local target3d=yarp.Bottle()
+                local bTarget3d=yarp.Bottle()
                 local bGazeCmd=yarp.Bottle()
-                bGazeCmd:addVocab("get")
-                bGazeCmd:addVocab("3D")
-                bGazeCmd:addVocab("proj")
+                bGazeCmd:addString("get")
+                bGazeCmd:addString("3D")
+                bGazeCmd:addString("proj")
                 local bGazeParamList=bGazeCmd:addList()
-                bGazeParamList:addVocab("left")
-                bGazeParamList:addDouble(target2d:get(0).asDouble())
-                bGazeParamList:addDouble(target2d:get(1).asDouble())
+                bGazeParamList:addString("left")
+                bGazeParamList:addDouble(target2d:get(0):asDouble())
+                bGazeParamList:addDouble(target2d:get(1):asDouble())
                 bGazeParamList:addDouble(a)
                 bGazeParamList:addDouble(b)
                 bGazeParamList:addDouble(c)
                 bGazeParamList:addDouble(d)
-                if gazectrlrpc_port:write(bGazeCmd, target3d)
+                if gazectrlrpc_port:write(bGazeCmd, bTarget3d)
                 then 
-                        if target3d:size()>2
-		        then
+                        if bTarget3d:size()>1 and bTarget3d:get(1):asList():size() --TODO check if and works as expected, or better, split checks
+		                then
+                    local target3d=bTarget3d:get(1):asList()
                             print("executing")
                             local bMotor=yarp.Bottle()
-                            if cmd:get(0):asString() == "draw" --[draw] cx cy cz theta radius dist. 
-                	    then
-                                bMotor:addVocab("draw")
+                            
+                            if cmd:get(0):asString():c_str() == "draw" --[draw] cx cy cz theta radius dist. 
+                	          then
+                                bMotor:addString("draw")
                 	    	bMotor:addDouble(target3d:get(0):asDouble())
                 	    	bMotor:addDouble(target3d:get(1):asDouble())
                 	    	bMotor:addDouble(table_height)
@@ -79,9 +81,9 @@ repeat
                 	    	bMotor:addDouble(radius)
                 	    	bMotor:addDouble(dist)
                             end
-                            if cmd:get(0):asString() == "push" --[push] cx cy cz theta radius. 
+                            if cmd:get(0):asString():c_str() == "push" --[push] cx cy cz theta radius. 
                             then 
-                                bMotor:addVocab("push")
+                                bMotor:addString("push")
                 	    	bMotor:addDouble(target3d:get(0):asDouble())
                 	    	bMotor:addDouble(target3d:get(1):asDouble())
                 	    	bMotor:addDouble(table_height)
@@ -91,31 +93,38 @@ repeat
                             local motorReply=yarp.Bottle()
                             karmamotor_port:write(bMotor, motorReply)
 
-                            if motorReply:get(0):asVocab() == "ack"
-			    then 
+                            if motorReply:get(0):asString():c_str() == "ack"
+			                then 
                                 print("successful")        
-                                hAnsw:addVocab("ack")
+                                hAnsw:addString("ack")
                             else
                                 print("failed")
-                                hAnsw:addVocab("nack")
+                                hAnsw:addString("nack")
                             end
-			else
+		                else
                             print("failed")
-                            hAnsw:addVocab("nack")
+                            hAnsw:addString("nack")
                         end
-		    else
+		            else
                         print("failed")
-                        hAnsw:addVocab("nack")
+                        hAnsw:addString("nack")
                     end
-		else
+		        else
                     print("failed")
-                    hAnsw:addVocab("nack")
+                    hAnsw:addString("nack")
                 end
+            print("failed")
+            hAnsw:addString("nack")
         end
-    elseif cmd:get(0):asString() == "draw"
+    elseif cmd:get(0):asString():c_str() == "quit"
     then shouldExit=true
+                    print("quitting")
+                    hAnsw:addString("ack")
+    else
+            print("failed")
+            hAnsw:addString("nack")
     end
-    human_port:write(hAnsw)
+    human_port:reply(hAnsw)
 until shouldExit ~= false
 
 print("finishing")
