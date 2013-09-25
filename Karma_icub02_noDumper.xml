@@ -1,0 +1,186 @@
+<application>
+    <name>Karma_icub02_noDumper</name>
+    <version>udp</version>
+    <authors>
+        <author email=""></author>
+    </authors>
+    <module>
+        <name>actionsRenderingEngine</name>
+        <parameters></parameters>
+        <node>icub14</node>
+        <prefix></prefix>
+        <geometry>(Pos (x 1146.59) (y 501.945))</geometry>
+    </module>
+    <module>
+        <name>activeSeg</name>
+        <parameters></parameters>
+        <node>icub14</node>
+        <prefix>/DMPnested:activeSeg:1</prefix>
+        <geometry>(Pos (x 501.5) (y 1068.76))</geometry>
+    </module>
+    <module>
+        <name>karmaMotor</name>
+        <parameters></parameters>
+        <node>icub-b14</node>
+        <prefix></prefix>
+        <geometry>(Pos (x 1852.95) (y 1026.31))</geometry>
+    </module>
+    <module>
+        <name>templatePFTracker</name>
+        <parameters></parameters>
+        <node>icub-b14</node>
+        <prefix>/DMPnested:templatePFTracker:1</prefix>
+        <geometry>(Pos (x 829.591) (y 1236.4))</geometry>
+    </module>
+    <module>
+        <name>velocityObserver</name>
+        <parameters></parameters>
+        <node>icub-b15</node>
+        <prefix>/DMPnested_icub02_withDumper:velocityObserver:1</prefix>
+        <geometry>(Pos (x 1726.91) (y 1350.93))</geometry>
+    </module>
+    <module>
+        <name>velocityObserver</name>
+        <parameters></parameters>
+        <node>icub-b15</node>
+        <prefix>/DMPnested_icub02_withDumper:velocityObserver:2</prefix>
+        <geometry>(Pos (x 1679.68) (y 1503.13))</geometry>
+    </module>
+    <module>
+        <name>xperience_data_acq.lua</name>
+        <parameters></parameters>
+        <node>icub14</node>
+        <prefix></prefix>
+        <geometry>(Pos (x 1505.5) (y 1003.97))</geometry>
+    </module>
+    <module>
+        <name>xperience_vision.lua</name>
+        <parameters></parameters>
+        <node>icub14</node>
+        <prefix></prefix>
+        <geometry>(Pos (x 1123.36) (y 1058.4))</geometry>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters></parameters>
+        <node>icub14</node>
+        <prefix>/seg</prefix>
+        <geometry>(Pos (x 761.318) (y 1067.85))</geometry>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters></parameters>
+        <node>icub14</node>
+        <prefix>/DMPnested:yarpview:2</prefix>
+        <geometry>(Pos (x 1131.36) (y 1346.11))</geometry>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>--out /seg</parameters>
+        <node>icub14</node>
+        <prefix>/target</prefix>
+        <geometry>(Pos (x 293.318) (y 1070.22))</geometry>
+    </module>
+    <connection>
+        <from external="true">/icub/camcalib/left/out</from>
+        <to>/DMPnested:activeSeg:1/activeSeg/image:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 432) (y 726.5)) ((x 383) (y 367)) ((x 502) (y 1086))  )</geometry>
+    </connection>
+    <connection>
+        <from>/DMPnested:activeSeg:1/activeSeg/imageCrop:o</from>
+        <to>/DMPnested:templatePFTracker:1/templatePFTracker/template/image:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 727) (y 1208)) ((x 645) (y 1124)) ((x 830) (y 1292))  )</geometry>
+    </connection>
+    <connection>
+        <from>/DMPnested:activeSeg:1/activeSeg/image:o</from>
+        <to>/seg/yarpview/img:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 693) (y 1092)) ((x 645) (y 1099)) ((x 762) (y 1085))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/camcalib/left/out</from>
+        <to>/DMPnested:templatePFTracker:1/templatePFTracker/left/image:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 596) (y 842)) ((x 383) (y 367)) ((x 830) (y 1317))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/camcalib/right/out</from>
+        <to>/DMPnested:templatePFTracker:1/templatePFTracker/right/image:i</to>
+        <protocol>mcast</protocol>
+        <geometry>(Pos ((x 716.5) (y 1349.5)) ((x 638) (y 1357)) ((x 830) (y 1342))  )</geometry>
+    </connection>
+    <connection>
+        <from>/DMPnested:templatePFTracker:1/templatePFTracker/left/image:o</from>
+        <to>/DMPnested:yarpview:2/yarpview/img:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 1074) (y 1309)) ((x 1037) (y 1254)) ((x 1132) (y 1364))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/cartesianController/left_arm/state:o</from>
+        <to>/DMPnested_icub02_withDumper:velocityObserver:1/velObs/pos:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 1656) (y 1371.5)) ((x 1606) (y 1374)) ((x 1727) (y 1369))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/cartesianController/right_arm/state:o</from>
+        <to>/DMPnested_icub02_withDumper:velocityObserver:2/velObs/pos:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 1620.5) (y 1524)) ((x 1582) (y 1527)) ((x 1680) (y 1521))  )</geometry>
+    </connection>
+    <connection>
+        <from>/DMPnested:templatePFTracker:1/templatePFTracker/target:o</from>
+        <to>/xpVision/target:i</to>
+        <protocol>tcp</protocol>
+        <geometry>(Pos ((x 1070) (y 1215)) ((x 1037) (y 1354)) ((x 1124) (y 1076))  )</geometry>
+    </connection>
+    <connection>
+        <from>/xpVision/target:o</from>
+        <to>/xpHelper/target:i</to>
+        <protocol>tcp</protocol>
+        <geometry>(Pos ((x 1420) (y 1061.5)) ((x 1355) (y 1076)) ((x 1506) (y 1047))  )</geometry>
+    </connection>
+    <connection>
+        <from>/xpHelper/kmotor:o</from>
+        <to>/karmaMotor/rpc</to>
+        <protocol>tcp</protocol>
+        <geometry>(Pos ((x 1792.5) (y 1033)) ((x 1753) (y 1022)) ((x 1853) (y 1044))  )</geometry>
+    </connection>
+    <connection>
+        <from>/xpHelper/are:o</from>
+        <to>/actionsRenderingEngine/cmd:io</to>
+        <protocol>tcp</protocol>
+        <geometry>(Pos ((x 1465.75) (y 378.25)) ((x 1753) (y 1047)) ((x 1706) (y 411)) ((x 1091) (y 412)) ((x 1147) (y 520))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/target/seg</from>
+        <to>/DMPnested:activeSeg:1/activeSeg/fixPoint:i</to>
+        <protocol>tcp</protocol>
+        <geometry>(Pos ((x 464) (y 1075.5)) ((x 447) (y 1037)) ((x 502) (y 1111))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/camcalib/left/out</from>
+        <to>/target/yarpview/img:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 328) (y 727.5)) ((x 383) (y 367)) ((x 294) (y 1088))  )</geometry>
+    </connection>
+    <connection>
+        <from>/DMPnested:templatePFTracker:1/templatePFTracker/target:o</from>
+        <to>/actionsRenderingEngine/tracker:i</to>
+        <protocol>tcp</protocol>
+        <geometry>(Pos ((x 1081.5) (y 1074.5)) ((x 1037) (y 1354)) ((x 1147) (y 795))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/camcalib/left/out</from>
+        <to>/actionsRenderingEngine/left/img:i</to>
+        <protocol>tcp</protocol>
+        <geometry>(Pos ((x 754.5) (y 493.5)) ((x 383) (y 367)) ((x 1147) (y 620))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/camcalib/right/out</from>
+        <to>/actionsRenderingEngine/right/img:i</to>
+        <protocol>tcp</protocol>
+        <geometry>(Pos ((x 882) (y 1001)) ((x 638) (y 1357)) ((x 1147) (y 645))  )</geometry>
+    </connection>
+</application>

@@ -1,7 +1,7 @@
 #!/usr/bin/lua
 
 --parameters
-table_height= -0.1
+table_height= -0.05
 
 thetaDraw = 90.0
 thetaPush = 270.0
@@ -83,24 +83,39 @@ repeat
     then
         if cmd:size() >4
         then
-            local bMotor=yarp.Bottle()
+            --send "expect" command to are
+            local bAre=yarp.Bottle()
+            local bAreReply=yarp.Bottle()
 
-            bMotor:addString("tool")
-            bMotor:addString("attach")
-            bMotor:addString(cmd:get(2):asString())
-       	    bMotor:addDouble(cmd:get(3):asDouble())
-            bMotor:addDouble(cmd:get(4):asDouble())
-            bMotor:addDouble(cmd:get(5):asDouble())
-            local motorReply=yarp.Bottle()
-            karmamotor_port:write(bMotor, motorReply)
-            if motorReply:get(0):asString() == "ack"
+            bAre:addString("expect")
+            are_port:write(bAre, bAreReply) 
+            if bAreReply:get(0):asString() == "ack"
             then 
-                print("grasping successful")        
-                hAnsw:addString("ack")
+                print("grasping successful")
+                --attach the tool to karmaMotor
+                local bMotor=yarp.Bottle()
+
+                bMotor:addString("tool")
+                bMotor:addString("attach")
+                bMotor:addString(cmd:get(2):asString())
+                bMotor:addDouble(cmd:get(3):asDouble())
+                bMotor:addDouble(cmd:get(4):asDouble())
+                bMotor:addDouble(cmd:get(5):asDouble())
+                local motorReply=yarp.Bottle()
+                karmamotor_port:write(bMotor, motorReply)
+                if motorReply:get(0):asString() == "ack"
+                then 
+                    print("attaching successful")
+                    hAnsw:addString("ack")
+                else
+                    print("attaching failed")
+                    hAnsw:addString("nack")
+                end
             else
-                print("grasping failed")        
+                print("grasping failed")
                 hAnsw:addString("nack")
             end
+
         else
            print("grasping command had too few arguments")
            hAnsw:addString("nack")
@@ -140,25 +155,25 @@ repeat
           --          local target3d=bTarget3d:get(1):asList()
                             print("executing")
                     local bMotor=yarp.Bottle()
-                          
+
                     if cmd:get(0):asString() == "draw" --[draw] cx cy cz theta radius dist. 
                     then
                         bMotor:addString("draw")
-                   	bMotor:addDouble(target3d:get(0):asDouble())
-                    	bMotor:addDouble(target3d:get(1):asDouble())
-                    	bMotor:addDouble(table_height)
-                    	bMotor:addDouble(thetaDraw)
-                    	bMotor:addDouble(radius)
-                    	bMotor:addDouble(dist)
+                        bMotor:addDouble(target3d:get(0):asDouble())
+                        bMotor:addDouble(target3d:get(1):asDouble())
+                        bMotor:addDouble(table_height)
+                        bMotor:addDouble(thetaDraw)
+                        bMotor:addDouble(radius)
+                        bMotor:addDouble(dist)
                     end
-                    if cmd:get(0):asString():c_str() == "push" --[push] cx cy cz theta radius. 
+                    if cmd:get(0):asString() == "push" --[push] cx cy cz theta radius. 
                     then 
                         bMotor:addString("push")
-              	    	bMotor:addDouble(target3d:get(0):asDouble())
-               	    	bMotor:addDouble(target3d:get(1):asDouble())
-               	    	bMotor:addDouble(table_height)
-               	    	bMotor:addDouble(thetaPush)
-               	    	bMotor:addDouble(radius)
+                        bMotor:addDouble(target3d:get(0):asDouble())
+                        bMotor:addDouble(target3d:get(1):asDouble())
+                        bMotor:addDouble(table_height)
+                        bMotor:addDouble(thetaPush)
+                        bMotor:addDouble(radius)
                     end
 
                     local bTrack=yarp.Bottle()
@@ -169,19 +184,19 @@ repeat
 
 --                    if(areReply:get(0):asString()=="ack")
 
-                
+
                     local motorReply=yarp.Bottle()
                     karmamotor_port:write(bMotor, motorReply)
-                    
+
                     if motorReply:get(0):asString() == "ack"
-		    then 
+                    then 
                         print("action successful")        
                         hAnsw:addString("ack")
                         local bAre=yarp.Bottle()
-                    	local areReply=yarp.Bottle()
-                    	bTrack:addString("home")
-                    	bTrack:addString("all")
-                    	are_port:write(bAre, areReply)
+                        local areReply=yarp.Bottle()
+                        bAre:addString("home")
+                        bAre:addString("all")
+                        are_port:write(bAre, areReply)
 --                    if(areReply:get(0):asString()=="ack")
                     else
                         print("action failed")
