@@ -61,6 +61,13 @@
         <geometry>(Pos (x 1123.36) (y 1058.4))</geometry>
     </module>
     <module>
+        <name>xperience_human_logger.lua</name>
+        <parameters></parameters>
+        <node>icub14</node>
+        <prefix></prefix>
+        <geometry>(Pos (x 1133.36) (y 1098.4))</geometry>
+    </module>
+    <module>
         <name>yarpview</name>
         <parameters></parameters>
         <node>icub14</node>
@@ -182,5 +189,10 @@
         <to>/actionsRenderingEngine/right/img:i</to>
         <protocol>tcp</protocol>
         <geometry>(Pos ((x 882) (y 1001)) ((x 638) (y 1357)) ((x 1147) (y 645))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/xpLogger/forward</from>
+        <to>/xpHelper/human</to>
+        <protocol>tcp</protocol>
     </connection>
 </application>

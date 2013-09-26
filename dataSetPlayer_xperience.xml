@@ -1,0 +1,121 @@
+<application>
+    <name>dataSetPlayer_xperience</name>
+    <module>
+        <name>dataSetPlayer</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <prefix></prefix>
+        <geometry>(Pos (x 10) (y 10))</geometry>
+    </module>
+    <module>
+        <name>iCubGui</name>
+        <parameters></parameters>
+        <node>localhost</node>
+        <prefix></prefix>
+        <geometry>(Pos (x 310) (y 10))</geometry>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>--x 0 --y 0 </parameters>
+        <node>localhost</node>
+        <prefix>/left</prefix>
+        <geometry>(Pos (x 610) (y 10))</geometry>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <parameters>--x 350 --y 0 </parameters>
+        <node>localhost</node>
+        <prefix>/right</prefix>
+        <geometry>(Pos (x 481) (y 132.9))</geometry>
+    </module>
+    <connection>
+        <from external="true">/icub/head/state:o</from>
+        <to external="true">/iCubGui/head:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 276.5) (y 261)) ((x 166) (y 240)) ((x 416) (y 280))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/inertial</from>
+        <to external="true">/iCubGui/inertial:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 262.5) (y 301)) ((x 138) (y 280)) ((x 416) (y 320))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/left_arm/state:o</from>
+        <to external="true">/iCubGui/left_arm:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 290.5) (y 341)) ((x 194) (y 320)) ((x 416) (y 360))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/right_arm/state:o</from>
+        <to external="true">/iCubGui/right_arm:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 294) (y 381)) ((x 201) (y 360)) ((x 416) (y 400))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/left_leg/state:o</from>
+        <to external="true">/iCubGui/left_leg:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 290.5) (y 421)) ((x 194) (y 400)) ((x 416) (y 440))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/right_leg/state:o</from>
+        <to external="true">/iCubGui/right_leg:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 294) (y 461)) ((x 201) (y 440)) ((x 416) (y 480))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/torso/state:o</from>
+        <to external="true">/iCubGui/torso:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 280) (y 501)) ((x 173) (y 480)) ((x 416) (y 520))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/xpHelper/human</from>
+        <to external="true">/tooltipPlotter/rpcSniff:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 262) (y 577)) ((x 201) (y 574)) ((x 344) (y 580))  )</geometry>
+    </connection><!-- remove either the previous or the next one-->
+    <connection>
+        <from external="true">/xpLogger/log</from>
+        <to external="true">/tooltipPlotter/rpcSniff:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 262) (y 577)) ((x 201) (y 574)) ((x 344) (y 580))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/cartesianController/right_arm/state:o</from>
+        <to external="true">/tooltipPlotter/eef:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 383) (y 628)) ((x 336) (y 628)) ((x 451) (y 628))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/tooltipPlotter/traj:o</from>
+        <to external="true">/iCubGui/objects</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 342) (y 696)) ((x 253) (y 687)) ((x 452) (y 705))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/targetPlotter/target:o</from>
+        <to external="true">/iCubGui/objects</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 329.5) (y 732)) ((x 228) (y 759)) ((x 452) (y 705))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/xpVision/target:o</from>
+        <to external="true">/targetPlotter/target:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 345) (y 831)) ((x 264) (y 842)) ((x 447) (y 820))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/camcalib/left/out</from>
+        <to>/left/yarpview/img:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 395.5) (y 94)) ((x 201) (y 160)) ((x 611) (y 28))  )</geometry>
+    </connection>
+    <connection>
+        <from external="true">/icub/camcalib/right/out</from>
+        <to>/right/yarpview/img:i</to>
+        <protocol>udp</protocol>
+        <geometry>(Pos ((x 334.5) (y 175.5)) ((x 208) (y 200)) ((x 482) (y 151))  )</geometry>
+    </connection>
+</application>

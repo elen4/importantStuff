@@ -150,7 +150,7 @@
         <geometry>(Pos ((x 1600.5) (y 1198)) ((x 1574) (y 1185)) ((x 1648) (y 1208))  )</geometry>
     </connection>
     <connection>
-        <from external="true">/xpHelper/human</from>
+        <from external="true">/xpLogger/log</from>
         <to>/humanOpDump/dump</to>
         <protocol>tcp+log.in</protocol>
         <geometry>(Pos ((x 1457) (y 937.5)) ((x 1489) (y 1008)) ((x 1495) (y 864))  )</geometry>
@@ -180,7 +180,7 @@
         <geometry>(Pos ((x 1930.5) (y 1545)) ((x 1880) (y 1521)) ((x 2002) (y 1569))  )</geometry>
     </connection>
     <connection>
-        <from external="true">/iKinGazeCtrl/head/x:o</from>
+        <from external="true">/iKinGazeCtrl/x:o</from>
         <to>/dumpActualFixPoint/dump</to>
         <protocol>udp</protocol>
         <geometry>(Pos ((x 1995.5) (y 893.5)) ((x 1963) (y 888)) ((x 2049) (y 896))  )</geometry>
