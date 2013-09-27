@@ -6,7 +6,7 @@
     </authors>
     <module>
         <name>actionsRenderingEngine</name>
-        <parameters></parameters>
+        <parameters>--motor::impedance off</parameters>
         <node>icub14</node>
         <prefix></prefix>
         <geometry>(Pos (x 1146.59) (y 501.945))</geometry>
