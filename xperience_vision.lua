@@ -1,7 +1,7 @@
 #!/usr/bin/lua
 
 --parameters
-table_height= -0.10
+table_height= -0.11
 
 -- initialization
 a=0.0
