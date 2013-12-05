@@ -3,10 +3,14 @@ fld=dir([basedir '/dumpLeftWrench_*']);
 leftWrenchData=importdata([basedir '/' fld(1).name '/data.log']);
 fld=dir([basedir '/dumpLeftEEFVel_*']);
 leftEEFvelData=importdata([basedir '/' fld(1).name  '/data.log']);
+fld=dir([basedir '/dumpLeftEEF_*']);
+leftEEFData=importdata([basedir '/' fld(1).name  '/data.log']);
 fld=dir([basedir '/dumpRightWrench_*']);
 rightWrenchData=importdata([basedir '/' fld(1).name  '/data.log']);
 fld=dir([basedir '/dumpRightEEFVel_*']);
 rightEEFvelData=importdata([basedir '/' fld(1).name  '/data.log']);
+fld=dir([basedir '/dumpRightEEF_*']);
+rightEEFData=importdata([basedir '/' fld(1).name  '/data.log']);
 fld=dir([basedir '/dumpTarget3d_*']);
 target3dData=importdata([basedir '/' fld(1).name  '/data.log']);
 fld=dir([basedir '/humanOpDump_*']);
@@ -24,7 +28,10 @@ for i=1:nCmds
     
     if strcmp(tmpCmd, '(grasp')
       tool = tmp{1, 5};
-      toolDims=tmp{1, 7:9};
+      toolDimsString=tmp(1, 7:9);
+      toolDims(1)=str2double(toolDimsString{1});
+      toolDims(2)=str2double(toolDimsString{2});
+      toolDims(3)=str2double(toolDimsString{3}(1:end-1));
       hand=tmp{1,6};
       cmds{i,1}='grasp';
       cmds{i,2}.tool=tool;
@@ -37,6 +44,7 @@ for i=1:nCmds
       cmds{i,1}='push';
       cmds{i,2}.tool=tool;
       cmds{i,2}.object=tmp{1,5};
+      cmds{i,2}.toolDims=toolDims;
       cmds{i,2}.hand=hand;
     end
     
@@ -44,6 +52,7 @@ for i=1:nCmds
       cmds{i,1}='pull';
       cmds{i,2}.tool=tool;
       cmds{i,2}.object=tmp{1,5};
+      cmds{i,2}.toolDims=toolDims;
       cmds{i,2}.hand=hand;
     end
     
@@ -76,14 +85,22 @@ leftWrenchTimes=leftWrenchData(:,2);
 leftEEFvel=sqrt(leftEEFvelData(:,3).^2+leftEEFvelData(:,4).^2+leftEEFvelData(:,5).^2);
 leftEEFvelTimes=leftEEFvelData(:,2);
 
+leftEEF=leftEEFData(:,3:9);
+leftEEFTimes=leftEEFData(:,2);
+
 rightWrench=rightWrenchData(:,9);
 rightWrenchTimes=rightWrenchData(:,2);
 
 rightEEFvel=sqrt(rightEEFvelData(:,3).^2+rightEEFvelData(:,4).^2+rightEEFvelData(:,5).^2);
 rightEEFvelTimes=rightEEFvelData(:,2);
 
+rightEEF=rightEEFData(:,3:9);
+rightEEFTimes=rightEEFData(:,2);
+
 target3dTimes=target3dData(:,2);
 target3dPos=target3dData(:, 3:5);
+%temporary for faulty "stick" data:
+target3dPos(end, :)=target3dPos(end-1, :);
 
 %% average values for each push or pull action
 
@@ -122,6 +139,62 @@ qualityLvel=qualityMapValues(binsLvel+1);
 qualityRvel=qualityMapValues(binsRvel+1);
 [actionProperties([foundPushIndices; foundPullIndices]).rightEEFvel]=deal(qualityRvel{:});
 
+%% compute approach direction
+minDistance=0.15;
+% filter target 3d position
+target3dSamplingStep=target3dTimes(2)-target3dTimes(1);
+cutoffFreq=1; %hertz
+[b,a]=butter(3,cutoffFreq*(2*target3dSamplingStep));
+target3dPosFiltered=filtfilt(b,a, target3dPos);
+
+figure, plot(target3dTimes, target3dPos, target3dTimes, target3dPosFiltered)
+pause
+for t_ind=1:nPushes
+    globalCmdIndex=foundPushIndices(t_ind);
+    if strcmp(cmds{globalCmdIndex, 2}.hand,'left')
+        timeSegment1=find(leftEEFTimes>startTimesPush(t_ind) & leftEEFTimes < endTimesPush(t_ind));
+        tooltipPosition=zeros(length(timeSegment1), 3);
+        for action_t_ind=timeSegment1'
+            tooltipPosition(action_t_ind, :)=leftEEF(action_t_ind, 1:3)+(vrrotvec2mat(leftEEF(action_t_ind, 4:7))*cmds{globalCmdIndex, 2}.toolDims')';
+        end
+
+    else
+        % TODO complete
+        timeSegment1=find(rightEEFTimes>startTimesPush(t_ind) & rightEEFTimes < endTimesPush(t_ind));
+        tooltipPosition=zeros(length(timeSegment1), 3);
+        for action_t_ind=timeSegment1'
+            tooltipPosition(action_t_ind, :)=rightEEF(action_t_ind, 1:3)+(vrrotvec2mat(rightEEF(action_t_ind, 4:7))*cmds{globalCmdIndex, 2}.toolDims')';
+        end
+
+    end
+    timeSegment2=find(target3dTimes>startTimesPush(t_ind) & target3dTimes< endTimesPush(t_ind));
+    actionProperties(foundPushIndices(t_ind)).approachDirection=computeApproachDirection(leftEEFTimes(timeSegment1), tooltipPosition(timeSegment1,:), target3dTimes(timeSegment2), target3dPosFiltered(timeSegment2, :) , minDistance);
+
+end
+
+for t_ind=1:nPulls
+    globalCmdIndex=foundPullIndices(t_ind);
+    if strcmp(cmds{globalCmdIndex, 2}.hand,'left')
+        timeSegment1=find(leftEEFTimes>startTimesPull(t_ind) & leftEEFTimes < endTimesPull(t_ind));
+        tooltipPosition=zeros(length(timeSegment1), 3);
+        for action_t_ind=timeSegment1'
+            tooltipPosition(action_t_ind, :)=leftEEF(action_t_ind, 1:3)+(vrrotvec2mat(leftEEF(action_t_ind, 4:7))*cmds{globalCmdIndex, 2}.toolDims')';
+        end
+
+    else
+        % TODO complete
+        timeSegment1=find(rightEEFTimes>startTimesPull(t_ind) & rightEEFTimes < endTimesPull(t_ind));
+        tooltipPosition=zeros(length(timeSegment1), 3);
+        for action_t_ind=timeSegment1'
+            tooltipPosition(action_t_ind, :)=rightEEF(action_t_ind, 1:3)+(vrrotvec2mat(rightEEF(action_t_ind, 4:7))*cmds{globalCmdIndex, 2}.toolDims')';
+        end
+
+    end
+    timeSegment2=find(target3dTimes>startTimesPull(t_ind) & target3dTimes< endTimesPull(t_ind));
+    actionProperties(foundPullIndices(t_ind)).approachDirection=computeApproachDirection(leftEEFTimes(timeSegment1), tooltipPosition(timeSegment1,:), target3dTimes(timeSegment2), target3dPosFiltered(timeSegment2, :), minDistance );
+
+end
+
 %% Print to file
 
 [pathstr,name]=fileparts(basedir);
@@ -141,7 +214,8 @@ if fid ~= -1
             fprintf(fid,'(leftForce %s) ',actionProperties(i).leftWrench);
             fprintf(fid,'(leftVelocity %s) ',actionProperties(i).leftEEFvel);
             fprintf(fid,'(rightForce %s) ',actionProperties(i).rightWrench);
-            fprintf(fid,'(rightVelocity %s)\n',actionProperties(i).rightEEFvel);
+            fprintf(fid,'(rightVelocity %s) ',actionProperties(i).rightEEFvel);
+            fprintf(fid,'(approachDirection %s)\n',actionProperties(i).approachDirection);
             
         end
         
@@ -151,14 +225,15 @@ if fid ~= -1
             fprintf(fid,'(leftForce %s) ',actionProperties(i).leftWrench);
             fprintf(fid,'(leftVelocity %s) ',actionProperties(i).leftEEFvel);
             fprintf(fid,'(rightForce %s) ',actionProperties(i).rightWrench);
-            fprintf(fid,'(rightVelocity %s)\n',actionProperties(i).rightEEFvel);
+            fprintf(fid,'(rightVelocity %s) ',actionProperties(i).rightEEFvel);
+            fprintf(fid,'(approachDirection %s)\n',actionProperties(i).approachDirection);
         end
         
         
         if strcmp(cmds{i,1}, 'ack')
             [dummy,timeBefore]=min(abs(target3dTimes - cmdTimes(i-1)));
             [dummy,timeAfter]=min(abs(target3dTimes - cmdTimes(i)));
-            fprintf(fid,'(targetPosition %s)\n', computeMovementDirection(target3dPos(timeBefore, :), target3dPos(timeAfter, :)));
+            fprintf(fid,'(targetPosition %s)\n', computeMovementDirection(target3dPosFiltered(timeBefore, :), target3dPosFiltered(timeAfter, :), 0.01));
         end
         
         
